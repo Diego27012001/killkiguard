@@ -1,31 +1,38 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 @Schema()
 export class User {
+  // @Prop({ required: true, default: () => uuidv4() }) // Generamos un UUID automáticamente al crear un nuevo documento
+  // uuid: string;
+
   @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })
   lastname: string;
 
-  @Prop()
+  @Prop({ required: true, unique: true })
   dni?: string;
 
   @Prop({ required: true, unique: true })
   username: string;
 
   @Prop({ required: true })
+  password: string;
+
+  @Prop({ required: true })
   email: string;
 
   @Prop({ required: true })
-  n_tuition: string;
-
-  @Prop({ default: 'assets/images/user/admin.jpg' })
-  img?: string;
+  phone: string;
 
   @Prop({ required: true })
-  password: string;
+  address: string;
+
+  @Prop({ required: true })
+  sex: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;
@@ -41,3 +48,5 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+export type UserDocument = User & Document; // Definición de UserDocument
