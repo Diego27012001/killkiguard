@@ -61,8 +61,18 @@ export class UsersService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string): Promise<User> {
+    try {
+      const user = await this.userModel.findById(id).populate('role').exec();
+
+      if (!user) {
+        throw new NotFoundException('Usuario no encontrado.');
+      }
+
+      return user;
+    } catch (error) {
+      throw new NotFoundException('Algo salió mal.');
+    }
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
