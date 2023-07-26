@@ -1,18 +1,19 @@
-version: "3.7"
+version: "3.8"
 
 services:
-  db:
+  mongodb:
     image: mongo
     container_name: mongodb_container
     restart: always
     environment:
-      MONGO_INITDB_DATABASE: ${DB_NAME}
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      # MONGO_INITDB_DATABASE: bd-killki
+      MONGO_INITDB_ROOT_USERNAME: myuser
+      MONGO_INITDB_ROOT_PASSWORD: mypassword
+      # MONGO_URI: mongodb://myuser:mypassword@127.0.0.1:27017/?authMechanism=DEFAULT
     volumes:
       - mongodb-data:/data/db
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - 27017:27017
 
 volumes:
   mongodb-data:
