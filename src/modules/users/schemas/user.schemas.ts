@@ -1,12 +1,8 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 
 @Schema()
 export class User {
-  // @Prop({ required: true, default: () => uuidv4() }) // Generamos un UUID automáticamente al crear un nuevo documento
-  // uuid: string;
-
   @Prop({ required: true })
   name: string;
 
