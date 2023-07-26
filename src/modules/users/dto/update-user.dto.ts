@@ -4,7 +4,7 @@ import { IsMongoId, IsNotEmpty, IsOptional, Matches, MaxLength, MinLength } from
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsNotEmpty({
-    message: 'El campo nombre es requerido',
+    message: 'El campo es requerido',
   })
   @IsMongoId({
     message: 'El valor proporcionado no es un _id válido',
