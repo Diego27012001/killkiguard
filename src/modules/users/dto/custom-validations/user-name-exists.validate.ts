@@ -1,19 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
+import { InjectModel } from "@nestjs/mongoose";
 import { registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
-
-import { Repository } from "typeorm";
-import { User } from "../../entities/user.entity";
+import { Model } from "mongoose";
+import { User, UserDocument } from "../../schemas/user.schemas";
 
 @ValidatorConstraint({ name: 'UserExists', async: true })
 @Injectable()
 export class UserExistsRule implements ValidatorConstraintInterface {
-    constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) { }
+    constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) { }
 
     async validate(value: string) {
         try {
-            await this.userRepository.findOneOrFail({ where: { username: value }, withDeleted: true });
-            return false;
+            const user = await this.userModel.findOne({ username: value }).exec();
+            return !user;
         } catch (e) {
             return true;
         }
@@ -35,5 +34,3 @@ export function UserExists(validationOptions?: ValidationOptions) {
         });
     };
 }
-
-
