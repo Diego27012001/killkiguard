@@ -15,7 +15,6 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<Object> {
-    try {
       const { password, username } = loginDto;
       const user_response = await this.userModel
         .findOne({ username })
@@ -34,9 +33,6 @@ export class AuthService {
         user: { _id, name, lastname, role },
         token: this.getJwtToken({ _id: user_response._id })
       };
-    } catch (error) {
-      throw new NotFoundException('Algo salió mal.');
-    }
   }
 
   async checkAuthStatus(user: UserDocument) {

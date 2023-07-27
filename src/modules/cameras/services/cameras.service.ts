@@ -12,7 +12,6 @@ export class CamerasService {
   ) {}
 
   async create(createCameraDto: CreateCameraDto): Promise<Camera> {
-    try {
       const { model, serie, brand, description, location, status,
         img, installationDate } = createCameraDto;
 
@@ -22,13 +21,9 @@ export class CamerasService {
       });
 
       return await newCamera.save();
-    } catch (error) {
-      throw new InternalServerErrorException('Error al crear camára.');
-    }
   }
 
   async findAll(): Promise<Camera[]> {
-    try {
       const cameras = await this.cameraModel.find().exec();
 
       if (!cameras) {
@@ -46,13 +41,9 @@ export class CamerasService {
       }
 
       return cameras;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener camáras.');
-    }
   }
 
   async findOne(id: string): Promise<Camera> {
-    try {
       const camera = await this.cameraModel.findById(id).exec();
 
       if (!camera) {
@@ -60,13 +51,9 @@ export class CamerasService {
       }
 
       return camera;
-    } catch (error) {
-      throw new NotFoundException('Algo salió mal.');
-    }
   }
 
   async update(id: string, updateCameraDto: UpdateCameraDto) {
-    try {
       const { ...cameraData } = updateCameraDto;
 
       let cameraUpdate: CameraDocument;
@@ -82,13 +69,9 @@ export class CamerasService {
       const populatedCamera = await this.cameraModel.findById(id).exec();
 
       return populatedCamera;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al actualiar cámara.');
-    }
   }
 
   async remove(id: string): Promise<Object> {
-    try {
       const deleteResponse = await this.cameraModel.findByIdAndDelete(id);
 
       if (!deleteResponse) {
@@ -99,8 +82,5 @@ export class CamerasService {
         status: HttpStatus.ACCEPTED,
         message: 'Cámara eliminada exitosamente.',
       };
-    } catch (error) {
-      throw new NotFoundException('Cámara no encontrada.');
-    }
   }
 }

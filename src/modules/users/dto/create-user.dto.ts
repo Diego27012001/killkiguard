@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsNumberString, IsPhoneNumber, Length, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsMongoId, IsNotEmpty, IsNumber, IsNumberString, IsPhoneNumber, Length, Matches, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
   @IsNotEmpty({
@@ -76,7 +76,6 @@ export class CreateUserDto {
   @IsNotEmpty({
     message: 'El campo teléfono es requerido',
   })
-  @IsPhoneNumber()
   @Length(9)
   // @Matches(/^(\+51)/)
   readonly phone: string;
@@ -106,10 +105,12 @@ export class CreateUserDto {
   readonly sex: string;
 
   //Validando el campo tipo de usuario
-  @IsNumber()
+  @IsMongoId({
+    message: 'El valor proporcionado no es un _id válido',
+  })
   @IsNotEmpty({
     message: 'El rol es requerido',
   })
   // @TypeUserExists()
-  readonly role: number;
+  readonly role: string;
 }

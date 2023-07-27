@@ -15,7 +15,6 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    try {
       const { password, role, ...userData } = createUserDto; 
       const frole = await this.roleModel.findById(role);
 
@@ -32,13 +31,9 @@ export class UsersService {
       });
 
       return await newUser.save();
-    } catch (error) {
-      throw new InternalServerErrorException('Error al crear usuario.');
-    }
   }
 
   async findAll(): Promise<User[]> {
-    try {
       const users = await this.userModel.find().populate('role').exec();
 
       if (!users) {
@@ -56,13 +51,9 @@ export class UsersService {
       }
 
       return users;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener usuarios.');
-    }
   }
 
   async findOne(id: string): Promise<User> {
-    try {
       const user = await this.userModel.findById(id).populate('role').exec();
 
       if (!user) {
@@ -70,13 +61,9 @@ export class UsersService {
       }
 
       return user;
-    } catch (error) {
-      throw new NotFoundException('Algo salió mal.');
-    }
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    try {
       const { password, role, ...userData } = updateUserDto;
       const frole = await this.roleModel.findById(role);
 
@@ -111,13 +98,9 @@ export class UsersService {
       const populatedUser = await this.userModel.findById(id).populate('role').exec();
 
       return populatedUser;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al actualiar usuario.');
-    }
   }
 
   async remove(id: string): Promise<Object> {
-    try {
       const deleteResponse = await this.userModel.findByIdAndDelete(id);
 
       if (!deleteResponse) {
@@ -128,9 +111,6 @@ export class UsersService {
         status: HttpStatus.ACCEPTED,
         message: 'Usuario eliminado exitosamente.',
       };
-    } catch (error) {
-      throw new NotFoundException('Usuario no encontrado.');
-    }
   }
 
 }
