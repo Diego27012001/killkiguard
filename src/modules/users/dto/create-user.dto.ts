@@ -120,6 +120,5 @@ export class CreateUserDto {
   @IsNotEmpty({
     message: 'El rol es requerido',
   })
-  // @TypeUserExists()
   readonly role: string;
 }
