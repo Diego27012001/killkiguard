@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, UploadedFile, UseInterceptors, Body, Patch, Param, Delete } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -9,7 +10,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
+  // @UseInterceptors(FileInterceptor('profileImage')) // 'profileImage' es el nombre del campo en el formulario donde se enviará la imagen
+  // async create(@UploadedFile() profileImage: Express.Multer.File, @Body() createUserDto: CreateUserDto): Promise<User> {
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    // Validar el archivo de imagen (opcional)
+    // if (profileImage && !this.usersService.isValidImageFile(profileImage)) {
+    //   throw new BadRequestException('El archivo de imagen no es válido.');
+    // }
     return this.usersService.create(createUserDto);
   }
 

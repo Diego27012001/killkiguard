@@ -15,7 +15,13 @@ export class CamerasService {
     const { model, serie, brand, description, location, status,
       camImage, installationDate } = createCameraDto;
 
-    let camImageBuffer: Buffer;
+    let camImageBuffer: Buffer | undefined;
+    if (camImage) {
+      if (!this.isValidImageFile(camImage)) {
+        throw new BadRequestException('El archivo de imagen no es válido.');
+      }
+      camImageBuffer = Buffer.from(camImage.buffer); // Esto asume que el objeto File en el cliente contiene la propiedad 'buffer' con los datos del archivo en formato Buffer
+    }
     if (camImage) {
       camImageBuffer = Buffer.from(camImage.buffer); // Esto asume que el objeto File en el cliente contiene la propiedad 'buffer' con los datos del archivo en formato Buffer
     }
@@ -26,6 +32,21 @@ export class CamerasService {
     });
 
     return await newCamera.save();
+  }
+
+  isValidImageFile(file: Express.Multer.File): boolean {
+    // Verifica que el tipo de archivo sea una imagen (jpeg, png, etc.)
+    if (!file.mimetype || !file.mimetype.includes('image/')) {
+      return false;
+    }
+
+    // Verifica el tamaño del archivo (2 MB como máximo permitido)
+    if (file.size > 2 * 1024 * 1024) {
+      return false;
+    }
+
+    // Si pasa todas las validaciones, entonces es un archivo de imagen válido
+    return true;
   }
 
   async findAll(): Promise<Camera[]> {
