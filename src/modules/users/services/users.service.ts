@@ -12,125 +12,119 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(Role.name) private readonly roleModel: Model<RoleDocument>,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    try {
-      const { password, role, ...userData } = createUserDto; 
-      const frole = await this.roleModel.findById(role);
+    const { password, role, profileImage, ...userData } = createUserDto;
+    const frole = await this.roleModel.findById(role);
 
-      if (!frole) {
-        throw new NotFoundException('Rol no encontrado.');
-      }
-
-      const hashedPassword = bcrypt.hashSync(password, 10);
-
-      const newUser = new this.userModel({
-        ...userData,
-        role: frole,
-        password: hashedPassword,
-      });
-
-      return await newUser.save();
-    } catch (error) {
-      throw new InternalServerErrorException('Error al crear usuario.');
+    if (!frole) {
+      throw new NotFoundException('Rol no encontrado.');
     }
+
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    let profileImageBuffer: Buffer;
+    if (profileImage) {
+      profileImageBuffer = Buffer.from(profileImage.buffer); // Esto asume que el objeto File en el cliente contiene la propiedad 'buffer' con los datos del archivo en formato Buffer
+    }
+
+    const newUser = new this.userModel({
+      ...userData,
+      role: frole,
+      password: hashedPassword,
+      profileImage: profileImageBuffer, // Asigna el Buffer de la imagen al campo 'profileImage' en el documento del usuario
+    });
+
+    return await newUser.save();
   }
 
   async findAll(): Promise<User[]> {
-    try {
-      const users = await this.userModel.find().populate('role').exec();
+    const users = await this.userModel.find().populate('role').exec();
 
-      if (!users) {
-        throw new NotFoundException('Algo salió mal.');
-      }
-
-      if (users.length === 0) {
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'No hay usuarios para mostrar.',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      return users;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener usuarios.');
+    if (!users) {
+      throw new NotFoundException('Algo salió mal.');
     }
+
+    if (users.length === 0) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'No hay usuarios para mostrar.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return users;
   }
 
   async findOne(id: string): Promise<User> {
-    try {
-      const user = await this.userModel.findById(id).populate('role').exec();
+    const user = await this.userModel.findById(id).populate('role').exec();
 
-      if (!user) {
-        throw new NotFoundException('Usuario no encontrado.');
-      }
-
-      return user;
-    } catch (error) {
-      throw new NotFoundException('Algo salió mal.');
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado.');
     }
+
+    return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
-    try {
-      const { password, role, ...userData } = updateUserDto;
-      const frole = await this.roleModel.findById(role);
+  async update(updateUserDto: UpdateUserDto) {
+    const { _id, password, role, profileImage, ...userData } = updateUserDto;
+    const frole = await this.roleModel.findById(role);
 
-      if (!frole) {
-        throw new NotFoundException('Rol no encontrado.');
-      }
-
-      let userUpdate: UserDocument;
-
-      if (password) {
-        if (password.length < 6) {
-          throw new BadRequestException('La contraseña debe contener como mínimo 6 caracteres.');
-        }
-        const hashedPassword = bcrypt.hashSync(password, 10);
-        userUpdate = await this.userModel.findByIdAndUpdate(
-          userData._id,
-          { ...userData, role: frole, password: hashedPassword },
-          { new: true },
-        );
-      } else {
-        userUpdate = await this.userModel.findByIdAndUpdate(
-          userData._id,
-          { ...userData, role: frole },
-          { new: true },
-        );
-      }
-
-      if (!userUpdate) {
-        throw new NotFoundException('Usuario no encontrado.');
-      }
-
-      const populatedUser = await this.userModel.findById(id).populate('role').exec();
-
-      return populatedUser;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al actualiar usuario.');
+    if (!frole) {
+      throw new NotFoundException('Rol no encontrado.');
     }
+
+    let userUpdate: UserDocument;
+
+    if (password) {
+      if (password.length < 6) {
+        throw new BadRequestException('La contraseña debe contener como mínimo 6 caracteres.');
+      }
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      userUpdate = await this.userModel.findByIdAndUpdate(
+        _id,
+        { ...userData, role: frole, password: hashedPassword },
+        { new: true },
+      );
+    } else {
+      userUpdate = await this.userModel.findByIdAndUpdate(
+        _id,
+        { ...userData, role: frole },
+        { new: true },
+      );
+    }
+
+    if (!userUpdate) {
+      throw new NotFoundException('Usuario no encontrado.');
+    }
+
+    // Si se proporciona una nueva imagen, actualiza el campo 'profileImage' en el documento del usuario
+    if (profileImage) {
+      const profileImageBuffer = Buffer.from(profileImage.buffer); // Convierte la nueva imagen a un objeto Buffer
+      userUpdate.profileImage = profileImageBuffer; // Actualiza el campo 'profileImage' con la nueva imagen
+      await userUpdate.save(); // Guarda los cambios en la base de datos
+    }
+
+    // Realiza una búsqueda para obtener el usuario actualizado con el campo 'role' poblado
+    const populatedUser = await this.userModel.findById(_id).populate('role').exec();
+
+    return populatedUser;
   }
 
   async remove(id: string): Promise<Object> {
-    try {
-      const deleteResponse = await this.userModel.findByIdAndDelete(id);
+    const deleteResponse = await this.userModel.findByIdAndDelete(id);
 
-      if (!deleteResponse) {
-        throw new NotFoundException('Usuario no encontrado.');
-      }
-
-      return {
-        status: HttpStatus.ACCEPTED,
-        message: 'Usuario eliminado exitosamente.',
-      };
-    } catch (error) {
+    if (!deleteResponse) {
       throw new NotFoundException('Usuario no encontrado.');
     }
+
+    return {
+      status: HttpStatus.ACCEPTED,
+      message: 'Usuario eliminado exitosamente.',
+    };
   }
 
 }

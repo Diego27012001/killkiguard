@@ -15,12 +15,13 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<Object> {
-    try {
       const { password, username } = loginDto;
       const user_response = await this.userModel
         .findOne({ username })
-        .populate('role')
+        .populate({ path: 'role', select: 'name' })
         .select('username password _id name lastname role');
+
+      console.log(user_response.role);
 
       if (!user_response)
         throw new BadRequestException(['Las credenciales son incorrectas']);
@@ -34,9 +35,6 @@ export class AuthService {
         user: { _id, name, lastname, role },
         token: this.getJwtToken({ _id: user_response._id })
       };
-    } catch (error) {
-      throw new NotFoundException('Algo salió mal.');
-    }
   }
 
   async checkAuthStatus(user: UserDocument) {

@@ -24,8 +24,8 @@ export class CamerasController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateCameraDto: UpdateCameraDto): Promise<Camera> {
-    return this.camerasService.update(id, updateCameraDto);
+  async update(@Body() updateCameraDto: UpdateCameraDto): Promise<Camera> {
+    return this.camerasService.update(updateCameraDto);
   }
 
   @Delete(':id')

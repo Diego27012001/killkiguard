@@ -23,9 +23,9 @@ export class UsersController {
     return this.usersService.findOne(id); // Implementa el método findOne en el servicio.
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
-    return this.usersService.update(id, updateUserDto); // Implementa el método update en el servicio.
+  @Patch()
+  async update(@Body() updateUserDto: UpdateUserDto): Promise<User> {
+    return this.usersService.update(updateUserDto); // Implementa el método update en el servicio.
   }
 
   @Delete(':id')
