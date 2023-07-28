@@ -15,5 +15,16 @@ services:
     ports:
       - 27017:27017
 
+  nestjs_app:
+    build:
+      context: ./
+      dockerfile: Dockerfile  # Nombre del archivo Dockerfile para la aplicación NestJS
+    container_name: nestjs_app_container
+    restart: always
+    depends_on:
+      - mongodb
+    ports:
+      - "3000:3000"  # Ajusta el puerto según el puerto expuesto por tu aplicación NestJS
+
 volumes:
   mongodb-data:

@@ -21,8 +21,8 @@ export class Camera {
   @Prop({ required: true })
   status: string;
 
-  @Prop({ required: true, default: 'assets/images/camera/camera.jpg' })
-  img: string;
+  @Prop({ type: Buffer, required: true }) // Tipo Buffer para almacenar la imagen
+  camImage?: Buffer;
 
   @Prop({ required: true })
   installationDate: Date;

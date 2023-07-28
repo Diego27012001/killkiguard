@@ -9,98 +9,90 @@ import { InjectModel } from '@nestjs/mongoose';
 export class CamerasService {
   constructor(
     @InjectModel(Camera.name) private readonly cameraModel: Model<CameraDocument>,
-  ) {}
+  ) { }
 
   async create(createCameraDto: CreateCameraDto): Promise<Camera> {
-    try {
-      const { model, serie, brand, description, location, status,
-        img, installationDate } = createCameraDto;
+    const { model, serie, brand, description, location, status,
+      camImage, installationDate } = createCameraDto;
 
-      const newCamera = new this.cameraModel({
-        model, serie, brand, description, location, status,
-        img, installationDate
-      });
-
-      return await newCamera.save();
-    } catch (error) {
-      throw new InternalServerErrorException('Error al crear camára.');
+    let camImageBuffer: Buffer;
+    if (camImage) {
+      camImageBuffer = Buffer.from(camImage.buffer); // Esto asume que el objeto File en el cliente contiene la propiedad 'buffer' con los datos del archivo en formato Buffer
     }
+
+    const newCamera = new this.cameraModel({
+      model, serie, brand, description, location, status,
+      camImage: camImageBuffer, installationDate
+    });
+
+    return await newCamera.save();
   }
 
   async findAll(): Promise<Camera[]> {
-    try {
-      const cameras = await this.cameraModel.find().exec();
+    const cameras = await this.cameraModel.find().exec();
 
-      if (!cameras) {
-        throw new NotFoundException('Algo salió mal.');
-      }
-
-      if (cameras.length === 0) {
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'No hay cámaras para mostrar.',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      return cameras;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener camáras.');
+    if (!cameras) {
+      throw new NotFoundException('Algo salió mal.');
     }
+
+    if (cameras.length === 0) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'No hay cámaras para mostrar.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return cameras;
   }
 
   async findOne(id: string): Promise<Camera> {
-    try {
-      const camera = await this.cameraModel.findById(id).exec();
+    const camera = await this.cameraModel.findById(id).exec();
 
-      if (!camera) {
-        throw new NotFoundException('Usuario no encontrado.');
-      }
-
-      return camera;
-    } catch (error) {
-      throw new NotFoundException('Algo salió mal.');
+    if (!camera) {
+      throw new NotFoundException('Usuario no encontrado.');
     }
+
+    return camera;
   }
 
-  async update(id: string, updateCameraDto: UpdateCameraDto) {
-    try {
-      const { ...cameraData } = updateCameraDto;
+  async update(updateCameraDto: UpdateCameraDto) {
+    const { _id, camImage, ...cameraData } = updateCameraDto;
 
-      let cameraUpdate: CameraDocument;
+    let cameraUpdate: CameraDocument;
 
-      cameraUpdate = await this.cameraModel.findByIdAndUpdate(
-        cameraData
-      );
+    cameraUpdate = await this.cameraModel.findByIdAndUpdate(
+      cameraData
+    );
 
-      if (!cameraUpdate) {
-        throw new NotFoundException('Cámara no encontrado.');
-      }
-
-      const populatedCamera = await this.cameraModel.findById(id).exec();
-
-      return populatedCamera;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al actualiar cámara.');
+    if (!cameraUpdate) {
+      throw new NotFoundException('Cámara no encontrado.');
     }
+
+    // Si se proporciona una nueva imagen, actualiza el campo 'profileImage' en el documento del usuario
+    if (camImage) {
+      const camImageBuffer = Buffer.from(camImage.buffer); // Convierte la nueva imagen a un objeto Buffer
+      cameraUpdate.camImage = camImageBuffer; // Actualiza el campo 'profileImage' con la nueva imagen
+      await cameraUpdate.save(); // Guarda los cambios en la base de datos
+    }
+
+    const populatedCamera = await this.cameraModel.findById(_id).exec();
+
+    return populatedCamera;
   }
 
   async remove(id: string): Promise<Object> {
-    try {
-      const deleteResponse = await this.cameraModel.findByIdAndDelete(id);
+    const deleteResponse = await this.cameraModel.findByIdAndDelete(id);
 
-      if (!deleteResponse) {
-        throw new NotFoundException('Cámara no encontrada.');
-      }
-
-      return {
-        status: HttpStatus.ACCEPTED,
-        message: 'Cámara eliminada exitosamente.',
-      };
-    } catch (error) {
+    if (!deleteResponse) {
       throw new NotFoundException('Cámara no encontrada.');
     }
+
+    return {
+      status: HttpStatus.ACCEPTED,
+      message: 'Cámara eliminada exitosamente.',
+    };
   }
 }

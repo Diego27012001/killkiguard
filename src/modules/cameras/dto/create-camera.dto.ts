@@ -1,4 +1,5 @@
 import { IsDate, IsNotEmpty, IsOptional, Matches, MaxLength, MinLength } from "class-validator";
+import { IsMimeType, MaxFileSize } from "./custom-validations/validate-image.validate";
 
 export class CreateCameraDto {
   @IsNotEmpty({
@@ -71,10 +72,14 @@ export class CreateCameraDto {
   @Matches(RegExp('^[A-Za-zıöüçğşİÖÜÇĞŞñÑáéíóúÁÉÍÓÚ,;.0-9\u00F1ñ -]+$'), { message: 'El campo estado solo puede contener letras' })
   readonly status: string;
   
+  // Campo de imagen
   @IsNotEmpty({
-    message: 'El campo imagen es requerido',
+    message: 'La imagen de perfil es requerida',
   })
-  readonly img: string;
+  @IsMimeType(['image/jpeg', 'image/png']) // Validar el tipo de archivo (opcionalmente puedes agregar más tipos)
+  @MaxFileSize(2 * 1024 * 1024) // 2 MB como tamaño máximo permitido
+  readonly camImage: any; // Aquí, 'any' se utiliza porque es un campo de archivo, el tipo real dependerá del manejador de archivos que estés utilizando
+
 
   @IsDate({
     message: 'Ingresar una fecha de instalación válida.'

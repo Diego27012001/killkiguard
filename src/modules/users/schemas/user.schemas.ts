@@ -30,6 +30,9 @@ export class User {
   @Prop({ required: true })
   sex: string;
 
+  @Prop({ type: Buffer, required: true }) // Tipo Buffer para almacenar la imagen
+  profileImage?: Buffer;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 
