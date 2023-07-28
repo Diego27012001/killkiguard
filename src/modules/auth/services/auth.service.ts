@@ -18,8 +18,10 @@ export class AuthService {
       const { password, username } = loginDto;
       const user_response = await this.userModel
         .findOne({ username })
-        .populate('role')
+        .populate({ path: 'role', select: 'name' })
         .select('username password _id name lastname role');
+
+      console.log(user_response.role);
 
       if (!user_response)
         throw new BadRequestException(['Las credenciales son incorrectas']);
