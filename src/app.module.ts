@@ -7,6 +7,8 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 // import { DatabaseProvider } from './config/database/database.provider';
 import { CamerasModule } from './modules/cameras/cameras.module';
+import { ResidentModule } from './modules/resident/resident.module';
+import { IncidentModule } from './modules/incidents/incidents.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { CamerasModule } from './modules/cameras/cameras.module';
     UsersModule,
     AuthModule,
     CamerasModule,
+    ResidentModule,
+    IncidentModule
   ],
   controllers: [],
   providers: [],
