@@ -1,4 +1,4 @@
-import { IsEmail, IsMongoId, IsNotEmpty, IsNumberString, Length, Matches, MaxLength, MinLength } from "class-validator";
+import { IsBase64, IsEmail, IsMongoId, IsNotEmpty, IsNumberString, IsOptional, Length, Matches, MaxLength, MinLength, isBase64 } from "class-validator";
 import { IsMimeType, MaxFileSize } from "./custom-validations/validate-image.validate";
 
 export class CreateUserDto {
@@ -106,13 +106,10 @@ export class CreateUserDto {
   readonly sex: string;
 
   // Campo de imagen
-  @IsNotEmpty({
-    message: 'La imagen de perfil es requerida',
-  })
-  @IsMimeType(['image/jpeg', 'image/png']) // Validar el tipo de archivo (opcionalmente puedes agregar más tipos)
-  @MaxFileSize(2 * 1024 * 1024) // 2 MB como tamaño máximo permitido
-  readonly profileImage: any; // Aquí, 'any' se utiliza porque es un campo de archivo, el tipo real dependerá del manejador de archivos que estés utilizando
-
+  @IsBase64()
+    @IsOptional()
+    profileImage: string;
+  
   //Validando el campo tipo de usuario
   @IsMongoId({
     message: 'El valor proporcionado no es un _id válido',

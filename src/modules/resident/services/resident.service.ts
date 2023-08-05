@@ -5,36 +5,43 @@ import { CreateResidentDto } from '../dto/create-resident.dto';
 import { UpdateResidentDto } from '../dto/update-resident.dto';
 import { Contact, ContactDocument } from '../schemas/contact.entity';
 import { Resident, ResidentDocument } from '../schemas/resident.entity';
-
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ResidentService {
   constructor(
     @InjectModel(Resident.name) private readonly residentModel: Model<ResidentDocument>,
     @InjectModel(Contact.name) private readonly contactModel: Model<ContactDocument>,
-  ) {}
+  ) { }
 
-
-  //CREATE RESIDENTS
+  //CREATE RESIDENT
 
   async create(createResidentDto: CreateResidentDto): Promise<Resident> {
-    try {
-      const {contact,...residentData} = createResidentDto; 
 
-      const newResident = new this.residentModel({
-        ...residentData,
-        contact: contact
-      });
+    try {
+      // Copiar todos los datos de createResidentDto a una nueva variable
+      const newResidentData = { ...createResidentDto };
+
+      // Guardar los contactos en la colección "contacto"
+      const savedContacts = await Promise.all(
+        createResidentDto.contact.map((contact) => new this.contactModel(contact).save())
+      );
+
+      // Establecer los IDs de los contactos relacionados en el nuevo residente
+      newResidentData.contact = savedContacts.map((contact) => contact._id);
+
+      // Crear el residente con todos los datos, incluyendo "contact"
+      const newResident = new this.residentModel(newResidentData);
 
       return await newResident.save();
     } catch (error) {
-      throw new InternalServerErrorException('Error al crear residente.');
+      throw new InternalServerErrorException('Error al crear residente.', error.message);
     }
   }
 
   //ALL RESIDENT
   async findAll(): Promise<Resident[]> {
-    try {
+
       const resident = await this.residentModel.find().populate('contact').exec();
 
       if (!resident) {
@@ -52,11 +59,8 @@ export class ResidentService {
       }
 
       return resident;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener usuarios.');
-    }
+  
   }
-
 
   //ONE RESIDENT
   async findOne(id: string): Promise<Resident> {
@@ -72,8 +76,6 @@ export class ResidentService {
       throw new NotFoundException('Algo salió mal.');
     }
   }
-
-
 
   //Delete Resident
 

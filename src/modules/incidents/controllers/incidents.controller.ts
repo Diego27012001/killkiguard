@@ -18,20 +18,19 @@ export class IncidentsController {
     return this.incidentsService.findAll();
   }
 
-  /*
-
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Camera> {
-    return this.camerasService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<Incident> {
+    return this.incidentsService.findOne(id);
+  }
+  
+  @Patch()
+  async update(@Body() updateUserDto: UpdateIncidentDto): Promise<Incident> {
+    return this.incidentsService.update(updateUserDto); 
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateCameraDto: UpdateCameraDto): Promise<Camera> {
-    return this.camerasService.update(id, updateCameraDto);
-  }
-
+  
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Object> {
-    return this.camerasService.remove(id);
-  }*/
+    return this.incidentsService.remove(id);
+  }
 }

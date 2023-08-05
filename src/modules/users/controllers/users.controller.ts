@@ -1,16 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,UploadedFile, UseInterceptors} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../schemas/user.schemas';
+import { fileFilter } from 'src/modules/files/helpers';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
+
   @Post()
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  //@Auth(ValidRoles.Administrador)
+  @UseInterceptors(FileInterceptor('profileImage', {
+      fileFilter: fileFilter,
+  }))
+  createUser(@Body() createUser: CreateUserDto, @UploadedFile() profileImage): Promise<User> {
+      return this.usersService.createUser(createUser, profileImage);
   }
 
   @Get()

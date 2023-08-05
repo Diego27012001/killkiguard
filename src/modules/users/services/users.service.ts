@@ -6,6 +6,9 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { Role, RoleDocument } from '../schemas/rol.schemas';
 import { User, UserDocument } from '../schemas/user.schemas';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs-extra';
+import sharp from 'sharp';
+
 
 @Injectable()
 export class UsersService {
@@ -14,28 +17,38 @@ export class UsersService {
     @InjectModel(Role.name) private readonly roleModel: Model<RoleDocument>,
   ) { }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const { password, role, profileImage, ...userData } = createUserDto;
-    const frole = await this.roleModel.findById(role);
+  async createUser(createUserDto: CreateUserDto, profileImage: Express.Multer.File): Promise<User> {
 
+ 
+    const { password, role, ...userData } = createUserDto;
+    const frole = await this.roleModel.findById(role);
     if (!frole) {
       throw new NotFoundException('Rol no encontrado.');
     }
+    console.log(profileImage)
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
-
-    let profileImageBuffer: Buffer;
-    if (profileImage) {
-      profileImageBuffer = Buffer.from(profileImage.buffer); // Esto asume que el objeto File en el cliente contiene la propiedad 'buffer' con los datos del archivo en formato Buffer
+    if (profileImage == null) {
+      throw new HttpException({
+        status: HttpStatus.BAD_REQUEST,
+        message: ['La imagen es requerida.'],
+      }, HttpStatus.BAD_REQUEST)
     }
+
+    const imageName = `${Date.now()}-${profileImage.originalname}`;
+    /*
+    const resizedBuffer = await sharp(profileImage.buffer)
+      .resize(500, 500)
+      .toBuffer();*/
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
     const newUser = new this.userModel({
       ...userData,
       role: frole,
       password: hashedPassword,
-      profileImage: profileImageBuffer, // Asigna el Buffer de la imagen al campo 'profileImage' en el documento del usuario
+      profileImage: imageName, 
     });
-
+    console.log(imageName)
+    await fs.writeFile(`./static/uploads/${imageName}`, profileImage.buffer);
     return await newUser.save();
   }
 
@@ -69,6 +82,7 @@ export class UsersService {
     return user;
   }
 
+  //UPDATE MAÑANA
   async update(updateUserDto: UpdateUserDto) {
     const { _id, password, role, profileImage, ...userData } = updateUserDto;
     const frole = await this.roleModel.findById(role);
@@ -103,8 +117,8 @@ export class UsersService {
 
     // Si se proporciona una nueva imagen, actualiza el campo 'profileImage' en el documento del usuario
     if (profileImage) {
-      const profileImageBuffer = Buffer.from(profileImage.buffer); // Convierte la nueva imagen a un objeto Buffer
-      userUpdate.profileImage = profileImageBuffer; // Actualiza el campo 'profileImage' con la nueva imagen
+      const profileImageBuffer = Buffer.from(profileImage); // Convierte la nueva imagen a un objeto Buffer
+      //userUpdate.profileImage = profileImageBuffer; // Actualiza el campo 'profileImage' con la nueva imagen
       await userUpdate.save(); // Guarda los cambios en la base de datos
     }
 

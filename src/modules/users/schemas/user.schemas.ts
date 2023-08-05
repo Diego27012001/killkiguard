@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+
 @Schema()
 export class User {
   @Prop({ required: true })
@@ -30,8 +31,8 @@ export class User {
   @Prop({ required: true })
   sex: string;
 
-  @Prop({ type: Buffer, required: true }) // Tipo Buffer para almacenar la imagen
-  profileImage?: Buffer;
+  @Prop({ required: true }) // Tipo Buffer para almacenar la imagen
+  profileImage?: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;

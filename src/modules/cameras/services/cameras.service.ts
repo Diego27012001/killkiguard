@@ -60,7 +60,7 @@ export class CamerasService {
 
   async update(updateCameraDto: UpdateCameraDto) {
     const { _id, camImage, ...cameraData } = updateCameraDto;
-
+    console.log(_id)
     let cameraUpdate: CameraDocument;
 
     cameraUpdate = await this.cameraModel.findByIdAndUpdate(

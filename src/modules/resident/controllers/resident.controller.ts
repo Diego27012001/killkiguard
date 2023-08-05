@@ -10,6 +10,7 @@ export class ResidentsController {
 
   @Post()
   async create(@Body() createResidentDto: CreateResidentDto): Promise<Resident> {
+   
     return this.residentService.create(createResidentDto);
   }
 

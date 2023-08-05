@@ -1,4 +1,6 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsNumberString, IsPhoneNumber, Length, Matches, MaxLength, MinLength } from "class-validator";
+import { IsArray, IsDateString, IsEmail, IsISO8601, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsPhoneNumber, IsString, Length, Matches, MaxLength, MinLength, ValidateNested } from "class-validator";
+import { ContactDto } from "./create-contact.dto";
+import { Type } from "class-transformer";
 
 export class CreateResidentDto {
 
@@ -41,12 +43,10 @@ export class CreateResidentDto {
   @IsNotEmpty({
     message: 'El campo teléfono es requerido',
   })
-  @IsPhoneNumber()
   @Length(9)
   // @Matches(/^(\+51)/)
   readonly phone: string;
 
-  
   @IsNotEmpty({
     message: 'El campo sexo es requerido',
   })
@@ -71,15 +71,26 @@ export class CreateResidentDto {
   @Matches(RegExp('^[A-Za-zıöüçğşİÖÜÇĞŞñÑáéíóúÁÉÍÓÚ,;.0-9\u00F1ñ -]+$'), { message: 'El campo dirección solo puede contener letras' })
   readonly address: string;
 
+  @ValidateNested({ each: true })
+  @Type(() => ContactDto)
+  readonly contact: ContactDto[];
+
+  @IsString({ message: 'El tipo de sangre debe ser un texto válido' })
+  @IsNotEmpty({ message: 'El tipo de sangre es requerido' })
   readonly blood_type: string;
 
+  @IsString({ message: 'El tipo seguro debe ser un texto válido' })
+  @IsNotEmpty({ message: 'El tipo seguro es requerido' })
   readonly safe_type: string;
 
-  readonly contact: [];
+  @IsArray({ message: 'Las alergias deben ser un arreglo válido' })
+  @IsOptional()
+  readonly allergies: string[];
 
-  readonly allergies: [];
+  @IsArray({ message: 'Las enfermedades deben ser un arreglo válido' })
+  @IsOptional()
+  readonly diseases: string[];
 
-  readonly diseases: [];
-
-  readonly birtg_date: string;
+  @IsNotEmpty({ message: 'La fecha de nacimiento es requerida' })
+  readonly birth_date: string;
 }
